@@ -1,0 +1,9 @@
+#!/usr/bin/env python
+
+import dockerparse
+
+with open(sys.argv[2], 'r') as f:
+    parsed = dockerparse.parse_dockerfile(f.read())
+
+script = '\n'.join(generate_script_from_parsed_dockerfile_lines(dockercontext, parsed['lines']))
+print script
