@@ -74,30 +74,6 @@ def generate_script_from_parsed_dockerfile_lines(dockercontext, lines):
             script.append('cp -a "%s/%s" "%s"' % (dockercontext, src, dst))
     return script
 
-def chroot_command(chroot, cmd):
-    return "chroot %s %s" % (chroot, cmd)
-
-def generate_chroot_script_from_parsed_dockerfile_lines(chroot, dockercontext, lines):
-    script = []
-    cc = lambda: chroot_command(chroot, cmd)
-    for command, value in lines:
-        if command.upper() == 'RUN':
-            value = value.replace('&amp;', '&')
-            script.append(value + ';')
-        elif command.upper() == 'WORKDIR':
-            script.append('cd "%s";' % value)
-        elif command.upper() == 'ENV':
-            e, val = re.split('\s+', value, 1)
-            script.append('export %s="%s";' % (e, val))
-            script.append('echo \'export %s="%s"\' >> ~/.bashrc;' % (e, val))
-            script.append('export %s="%s";' % (e, val))
-            script.append('echo \'export %s="%s"\' >> ~/.bashrc;' % (e, val))
-        elif command.upper() == 'ADD' or command.upper() == 'COPY':
-            src, dst = re.split('\s+', value, 1)
-            script.append('mkdir -p "%s"' % dst)
-            script.append('cp -a "%s/%s" "%s"' % (dockercontext, src, dst))
-    return script
-
 def generate_final_command_from_parsed_dockerfile(p):
     entrypoint = p['ENTRYPOINT']
     cmd = p['CMD']
