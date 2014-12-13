@@ -1,6 +1,6 @@
 #!/bin/sh
 cd ~/.rgtools
 git pull --rebase
-cd ~/.rgrepo
+cd ~/.repository
 git fetch
 git checkout "$1"

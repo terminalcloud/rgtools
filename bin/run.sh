@@ -1,7 +1,7 @@
 #!/bin/sh
 cd ~/
 if [ -a .rgrepo/Snapfile ]; then
-    runsnapfile .rgrepo/Snapfile
+    runsnap .repository/Snapfile
 elsif [ -a .rgrepo/Dockerfile ]; then
-    rundocker chroot .rgrepo/Dockerfile
+    rundocker snap .repository/Dockerfile
 fi

@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 
-import sys
 import os
+import re
+import sys
+import shutil
+import subprocess
 
 import dockerparse
 
 if len(sys.argv) < 2:
-    print "Usage: setup.sh <chroot_dir> <Dockerfile>"
+    print "Usage: installdocker <chroot_dir> <Dockerfile>"
     sys.exit(1)
 
 chrootdir = sys.argv[1]
@@ -15,11 +18,30 @@ dockerfile = sys.argv[2]
 with open(dockerfile, 'r') as f:
     parsed = dockerparse.parse_dockerfile(f.read())
 
-repopath = os.path.normpath('~/.rgrepo')
-os.link(repopath, os.path.join(chrootdir, '.rgrepo'))
-dockercontext = '.rgrepo'
+repopath = os.path.normpath(os.path.join(os.environ['HOME'], '.repository'))
 
-script = '\n'.join(generate_script_from_parsed_dockerfile_lines(dockercontext, parsed['lines']))
-with open(os.path.join(chrootdir, '.rgsetup')) as f:
-    f.write('#!/bin/sh\nscript')
+workdir = '/'
+env = {} # os.environ.copy()
+
+def call(cmd):
+    envs = ' '.join('%s=%s' % (e,v) for e,v in env.iteritems())
+    truecmd = 'cd %s && env %s %s' % (workdir, envs, cmd)
+    print truecmd
+    #subprocess.call(['chroot', chrootdir, truecmd])
+
+for command, value in parsed['lines']:
+    if command.upper() == 'RUN':
+        value = value.replace('&amp;', '&')
+        call(value)
+    elif command.upper() == 'WORKDIR':
+        workdir = value
+    elif command.upper() == 'ENV':
+        e, val = re.split('\s+', value, 1)
+        env[e] = val
+        subprocess.call('echo \'export %s="%s"\' >> ~/.bashrc;' % (e, val), shell=True)
+    elif command.upper() == 'ADD' or command.upper() == 'COPY':
+        src, dst = re.split('\s+', value, 1)
+        truedst = os.path.join(chrootdir, dst.lstrip('/'))
+        dockerparse.mkdir_p(truedst)
+        shutil.copytree(os.path.join(repopath, src), truedst)
 

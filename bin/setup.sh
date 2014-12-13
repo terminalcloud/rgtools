@@ -1,8 +1,8 @@
 #!/bin/sh
 cd ~/
 if [ -a .rgrepo/Snapfile ]; then
-    installsnapfile .rgrepo/Snapfile
+    installsnap .repository/Snapfile
 elsif [ -a .rgrepo/Dockerfile ]; then
-    installdocker chroot .rgrepo/Dockerfile
+    installdocker snap .repository/Dockerfile
 fi
 . ~/.bashrc
