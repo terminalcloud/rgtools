@@ -26,8 +26,7 @@ env = {} # os.environ.copy()
 def call(cmd):
     envs = ' '.join('%s=%s' % (e,v) for e,v in env.iteritems())
     truecmd = 'cd %s && env %s %s' % (workdir, envs, cmd)
-    print truecmd
-    #subprocess.call(['chroot', chrootdir, truecmd])
+    subprocess.call(['chroot', chrootdir, truecmd])
 
 for command, value in parsed['lines']:
     if command.upper() == 'RUN':
