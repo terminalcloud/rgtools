@@ -1,0 +1,6 @@
+#!/bin/sh
+#FROM: www.terminal.com/023u09238
+
+apt-get install -y python
+
+#RUN: echo "Hello, world"
