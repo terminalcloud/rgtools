@@ -45,15 +45,24 @@ def parse_dockerfile(dockerfile):
     lines = re.findall(r'\n(COPY|copy|ADD|add|RUN|run|WORKDIR|workdir|ENV|env)\s+(.*)', dockerfile)
     cmds = [a[1] for a in re.findall(r'\n(CMD|cmd)\s+(.*)', dockerfile)]
     envs = [a[1] for a in re.findall(r'\n(ENV|env)\s+(.*)', dockerfile)]
+    volumes = [a[1] for a in re.findall(r'\n(volume|VOLUME)\s+(.*)', dockerfile)]
+    wdir = [a[1] for a in re.findall(r'\n(workdir|WORKDIR)\s+(.*)', dockerfile)]
+    duser = [a[1] for a in re.findall(r'\n(user|USER)\s+(.*)', dockerfile)]
     entrypoint = [a[1] for a in re.findall(r'\n(ENTRYPOINT|entrypoint)\s+(.*)', dockerfile)]
     d = {'FROM': f,
         'lines': lines,
         'CMD': cmds,
         'ENV': envs,
+        'VOL': volumes,
+        'WDIR': wdir,
         'ENTRYPOINT': entrypoint,
     }
     if len(maintainer) > 0:
         d['MAINTAINER'] = maintainer[0]
+    if len(duser) > 0:
+   			d['USER'] = duser[0]
+   	else:
+   			d['USER'] = 'root'
     return d
 
 def generate_script_from_parsed_dockerfile_lines(dockercontext, lines):
