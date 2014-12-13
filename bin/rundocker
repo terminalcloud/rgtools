@@ -92,12 +92,33 @@ def full_docker_url(dockeruserandname):
     url = 'https://registry.hub.docker.com/u/%s/dockerfile/raw' % dockeruserandname
     return url
 
+def make_startup_script(rootdir, runscript, parsed):
+    if os.path.exists(runscript):
+      print 'Docker startup script ' + runscript + 'already exists'
+    else:
+      with open(runscript, 'w') as f:
+        if get_envs(parsed) != None:
+          f.write(str(get_envs(parsed)))
+        if get_wdir(parsed) != None:
+          f.write(str(get_wdir(parsed)))
+        if get_entrypoints(parsed) != None:
+          f.write(str(get_entrypoints(parsed)))
+        f.write('\n')
+        f.close()
+
+def mount_volumes(parsed, volumesdir, rootdir):
+    if len(parsed['VOL']) > 0 :
+      print 'Creating volumes'
+      mkdir_p(volumesdir)
+      for vol in parsed['VOL']:
+        mkdir_p(volumesdir + vol)
+        subprocess.call(["mount", "-o", "bind", (rootdir + vol), (volumesdir + vol)])
+
+
 #################################### MAIN ######################################
 
 if __name__ == '__main__':
     rootdir = sys.argv[1]
-
-runsh = 'run.sh'
 
 # Remove additional slashes from the argv
 while (rootdir[0] == '/'): rootdir = rootdir[1:(len(rootdir)+1)]
@@ -107,30 +128,15 @@ while (rootdir[len(rootdir)-1] == '/') : rootdir = rootdir[0:(len(rootdir)-1)]
 url = full_docker_url(rootdir)
 parsed = parse_dockerfile(get_dockerfile(url))
 user, dock = re.split('/', rootdir, 1)
+runsh = 'run.sh'
 
 # mount the volumes if needed
 volumesdir = os.path.join(user, 'volumes')
-if len(parsed['VOL']) > 0 :
-  print 'Creating volumes'
-  mkdir_p(volumesdir)
-  for vol in parsed['VOL']:
-    mkdir_p(volumesdir + vol)
-    subprocess.call(["mount", "-o", "bind", (rootdir + vol), (volumesdir + vol)])
+mount_volumes(parsed, volumesdir, rootdir)
 
 # Make the docker startup script where it should go
 runscript = os.path.join(rootdir, runsh)
-if os.path.exists(runscript):
-  print 'Docker startup script ' + runscript + 'already exists'
-else:
-  with open(runscript, 'w') as f:
-    if get_envs(parsed) != None:
-      f.write(str(get_envs(parsed)))
-    if get_wdir(parsed) != None:
-      f.write(str(get_wdir(parsed)))
-    if get_entrypoints(parsed) != None:
-      f.write(str(get_entrypoints(parsed)))
-    f.write('\n')
-    f.close()
+make_startup_script(rootdir, runscript, parsed)
 
 # Change the startup script permissions:
 os.chmod(runscript, 0755)
