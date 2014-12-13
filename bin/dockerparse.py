@@ -57,12 +57,14 @@ def parse_dockerfile(dockerfile):
         'WDIR': wdir,
         'ENTRYPOINT': entrypoint,
     }
+
     if len(maintainer) > 0:
         d['MAINTAINER'] = maintainer[0]
+        
     if len(duser) > 0:
-   			d['USER'] = duser[0]
-   	else:
-   			d['USER'] = 'root'
+   	    d['USER'] = duser[0]
+    else:
+        d['USER'] = 'root'
     return d
 
 def generate_script_from_parsed_dockerfile_lines(dockercontext, lines):
