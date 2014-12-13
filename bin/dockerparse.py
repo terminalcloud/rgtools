@@ -40,6 +40,7 @@ def open_cached_dockerfile_url(url):
     return parsed
 
 def parse_dockerfile(dockerfile):
+    dockerfile = dockerfile.replace('\\\n', ' ')
     f = [a[1] for a in re.findall(r'(FROM|from)\s+(.*)', dockerfile)][0]
     maintainer = [a[1] for a in re.findall(r'(MAINTAINER|maintainer)\s+(.*)', dockerfile)]
     lines = re.findall(r'\n(COPY|copy|ADD|add|RUN|run|WORKDIR|workdir|ENV|env)\s+(.*)', dockerfile)
