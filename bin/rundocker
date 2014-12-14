@@ -63,7 +63,7 @@ while (rootdir[len(rootdir)-1] == '/') : rootdir = rootdir[0:(len(rootdir)-1)]
 # Initialize
 url = full_docker_url(rootdir)
 parsed = parse_dockerfile(get_dockerfile(url))
-user, dock = re.split('/', rootdir, 1)
+user, dock = os.path.split(rootdir)
 runsh = 'run.sh'
 
 # mount the volumes if needed
