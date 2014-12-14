@@ -7,72 +7,9 @@ import errno
 import urllib2
 import hashlib
 import subprocess
+from dockerparse import mkdir_p, full_docker_url, parse_dockerfile, get_dockerfile
+from dockerparse import generate_final_command_from_parsed_dockerfile as get_entrypoints
 
-
-def mkdir_p(path):
-    try:
-        os.makedirs(path)
-    except OSError as exc:
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else: raise
-
-def get_dockerfile(url):
-    urlhash = hashlib.md5(url).hexdigest()
-    dockerfilecachedir = '.dockerfilecache'
-    mkdir_p(dockerfilecachedir)
-    cache_filename = os.path.join(dockerfilecachedir, urlhash)
-    if os.path.exists(cache_filename):
-        dockerfile = open(cache_filename, 'r').read()
-    else:
-        dockerfile = urllib2.urlopen(url).read()
-        with open(cache_filename, 'w') as f:
-            f.write(dockerfile)
-    return dockerfile
-
-def parse_dockerfile(dockerfile):
-    f = [a[1] for a in re.findall(r'(FROM|from)\s+(.*)', dockerfile)][0]
-    maintainer = [a[1] for a in re.findall(r'(MAINTAINER|maintainer)\s+(.*)', dockerfile)]
-    lines = re.findall(r'\n(COPY|copy|ADD|add|RUN|run|ENV|env)\s+(.*)', dockerfile)
-    cmds = [a[1] for a in re.findall(r'\n(CMD|cmd)\s+(.*)', dockerfile)]
-    envs = [a[1] for a in re.findall(r'\n(ENV|env)\s+(.*)', dockerfile)]
-    volumes = [a[1] for a in re.findall(r'\n(volume|VOLUME)\s+(.*)', dockerfile)]
-    wdir = [a[1] for a in re.findall(r'\n(workdir|WORKDIR)\s+(.*)', dockerfile)]
-    duser = [a[1] for a in re.findall(r'\n(user|USER)\s+(.*)', dockerfile)]
-    entrypoint = [a[1] for a in re.findall(r'\n(ENTRYPOINT|entrypoint)\s+(.*)', dockerfile)]
-    d = {'FROM': f,
-        'lines': lines,
-        'CMD': cmds,
-        'ENV': envs,
-        'VOL': volumes,
-        'WDIR': wdir,
-        'ENTRYPOINT': entrypoint,
-    }
-    if len(maintainer) > 0:
-        d['MAINTAINER'] = maintainer[0]
-    if len(duser) > 0:
-        d['USER'] = duser[0]
-    else:
-        d['USER'] = 'root'
-    return d
-
-def get_entrypoints(parsed):
-    entrypoint = parsed['ENTRYPOINT']
-    cmd = parsed['CMD']
-    final = ''
-    if len(entrypoint) > 0:
-        entrypoint = entrypoint[0]
-        if '"' in entrypoint:
-            final = ' '.join(json.loads(entrypoint))
-        else:
-            final = entrypoint
-    if len(cmd) > 0:
-        cmd = cmd[0]
-        if '"' in cmd:
-            final += ' '.join(json.loads(cmd))
-        else:
-            final += ' ' + cmd
-    return final
 
 def get_envs(parsed):
     envs = parsed['ENV']
@@ -83,28 +20,27 @@ def get_envs(parsed):
       exports += 'echo \'export %s="%s"\' >> ~/.bashrc;\n' % (e, val)
     return exports
 
+
 def get_wdir(parsed):
     if len(parsed['WDIR']) > 0:
       wdir = parsed['WDIR'][0]
-      return 'cd "%s";' % wdir
-
-def full_docker_url(dockeruserandname):
-    url = 'https://registry.hub.docker.com/u/%s/dockerfile/raw' % dockeruserandname
-    return url
+      return 'cd "%s";\n' % wdir
+    else:
+      return ''
 
 def make_startup_script(rootdir, runscript, parsed):
-    if os.path.exists(runscript):
-      print 'Docker startup script ' + runscript + 'already exists'
-    else:
-      with open(runscript, 'w') as f:
-        if get_envs(parsed) != None:
-          f.write(str(get_envs(parsed)))
-        if get_wdir(parsed) != None:
-          f.write(str(get_wdir(parsed)))
-        if get_entrypoints(parsed) != None:
-          f.write(str(get_entrypoints(parsed)))
-        f.write('\n')
-        f.close()
+   if os.path.exists(runscript):
+     print 'Docker startup script ' + runscript + 'already exists'
+   else:
+     with open(runscript, 'w') as f:
+       if get_envs(parsed) != None:
+         f.write(str(get_envs(parsed)))
+       if get_wdir(parsed) != None:
+         f.write(str(get_wdir(parsed)))
+       if get_entrypoints(parsed) != None:
+         f.write(str(get_entrypoints(parsed)))
+       f.write('\n')
+       f.close()
 
 def mount_volumes(parsed, volumesdir, rootdir):
     if len(parsed['VOL']) > 0 :
@@ -142,4 +78,4 @@ make_startup_script(rootdir, runscript, parsed)
 os.chmod(runscript, 0755)
 
 # Launching the Jail
-subprocess.call(['chroot', ('--userspec=' + parsed['USER']), rootdir, (os.path.join ('/' , runsh))])
+subprocess.call(['chroot', ('--userspec=' + parsed['USER']), rootdir, os.path.join('/' , runsh)])
