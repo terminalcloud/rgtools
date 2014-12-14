@@ -24,9 +24,9 @@ def mkdir_p(path):
             pass
         else: raise
 
-def open_cached_dockerfile_url(url):
+def get_dockerfile(url):
     urlhash = hashlib.md5(url).hexdigest()
-    dockerfilecachedir = '.dockerfilecache' 
+    dockerfilecachedir = '.dockerfilecache'
     mkdir_p(dockerfilecachedir)
     cache_filename = os.path.join(dockerfilecachedir, urlhash)
     if os.path.exists(cache_filename):
@@ -35,7 +35,10 @@ def open_cached_dockerfile_url(url):
         dockerfile = urllib2.urlopen(url).read()
         with open(cache_filename, 'w') as f:
             f.write(dockerfile)
+    return dockerfile
 
+def open_cached_dockerfile_url(url):
+    dockerfile = get_dockerfile(url)
     parsed = parse_dockerfile(dockerfile)
     return parsed
 
@@ -61,7 +64,7 @@ def parse_dockerfile(dockerfile):
 
     if len(maintainer) > 0:
         d['MAINTAINER'] = maintainer[0]
-        
+
     if len(duser) > 0:
    	    d['USER'] = duser[0]
     else:
@@ -120,7 +123,7 @@ def base_image(parsed_dockerfile):
 def full_docker_url(dockerfilename):
     url = 'https://registry.hub.docker.com/u/%s/dockerfile/raw' % dockerfilename
     return url
-    
+
 def generate_full_shell_commands_for_parsed_dockerfile(dockercontext, p):
     recursive_sh = ''
     base = base_image(p)
