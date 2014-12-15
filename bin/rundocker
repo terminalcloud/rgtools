@@ -6,7 +6,8 @@ import json
 import errno
 import urllib2
 import hashlib
-# import argparse
+import subprocess
+import shlex
 from dockerparse import mkdir_p, full_docker_url, parse_dockerfile, get_dockerfile
 from dockerparse import generate_final_command_from_parsed_dockerfile as get_entrypoints
 
@@ -70,7 +71,11 @@ user, dock = os.path.split(rootdir)
 volumesdir = os.path.join(user, 'volumes')
 mount_volumes(parsed, volumesdir, rootdir)
 
-# Launching the Jail
+# Chroot
+os.chroot(rootdir)
+
+# Commands execution
 cmdchain = 'su -l ' + parsed['USER'] + " -c '" +  str(get_envs(parsed)) + str(get_wdir(parsed)) + str(get_entrypoints(parsed)) + "'"
-print cmdchain
-os.system("chroot" + " " + rootdir + " " + str(cmdchain))
+popen_arguments = shlex.split(str(cmdchain))
+print popen_arguments
+subprocess.Popen(popen_arguments)
