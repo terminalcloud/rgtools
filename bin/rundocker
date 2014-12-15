@@ -6,7 +6,6 @@ import json
 import errno
 import urllib2
 import hashlib
-import subprocess
 from dockerparse import mkdir_p, full_docker_url, parse_dockerfile, get_dockerfile
 from dockerparse import generate_final_command_from_parsed_dockerfile as get_entrypoints
 
@@ -16,8 +15,7 @@ def get_envs(parsed):
     exports = ''
     for env in envs:
       e, val = re.split('\s+', env, 1)
-      exports += 'export %s="%s"; ' % (e, val)
-      exports += 'echo \'export %s="%s"\' >> ~/.bashrc;\n' % (e, val)
+      exports += 'export %s=\"%s\"; ' % (e, val)
     return exports
 
 
@@ -51,6 +49,7 @@ def mount_volumes(parsed, volumesdir, rootdir):
         subprocess.call(["mount", "-o", "bind", (rootdir + vol), (volumesdir + vol)])
 
 
+
 #################################### MAIN ######################################
 
 if __name__ == '__main__':
@@ -64,18 +63,12 @@ while (rootdir[len(rootdir)-1] == '/') : rootdir = rootdir[0:(len(rootdir)-1)]
 url = full_docker_url(rootdir)
 parsed = parse_dockerfile(get_dockerfile(url))
 user, dock = os.path.split(rootdir)
-runsh = 'run.sh'
 
 # mount the volumes if needed
 volumesdir = os.path.join(user, 'volumes')
 mount_volumes(parsed, volumesdir, rootdir)
 
-# Make the docker startup script where it should go
-runscript = os.path.join(rootdir, runsh)
-make_startup_script(rootdir, runscript, parsed)
-
-# Change the startup script permissions:
-os.chmod(runscript, 0755)
-
 # Launching the Jail
-subprocess.call(['chroot', ('--userspec=' + parsed['USER']), rootdir, os.path.join('/' , runsh)])
+cmdchain = 'su -l ' + parsed['USER'] + " -c '" +  str(get_envs(parsed)) + str(get_wdir(parsed)) + str(get_entrypoints(parsed)) + "'"
+print cmdchain
+os.system("chroot" + " " + rootdir + " " + str(cmdchain))
