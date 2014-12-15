@@ -6,6 +6,7 @@ import json
 import errno
 import urllib2
 import hashlib
+# import argparse
 from dockerparse import mkdir_p, full_docker_url, parse_dockerfile, get_dockerfile
 from dockerparse import generate_final_command_from_parsed_dockerfile as get_entrypoints
 
@@ -54,6 +55,7 @@ def mount_volumes(parsed, volumesdir, rootdir):
 
 if __name__ == '__main__':
     rootdir = sys.argv[1]
+
 
 # Remove additional slashes from the argv
 while (rootdir[0] == '/'): rootdir = rootdir[1:(len(rootdir)+1)]
