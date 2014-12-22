@@ -15,6 +15,8 @@ if len(sys.argv) < 2:
 chrootdir = sys.argv[1]
 dockerfile = sys.argv[2]
 
+shutil.copy2('/etc/resolv.conf', os.path.join(chrootdir, 'etc/resolv.conf'))
+
 with open(dockerfile, 'r') as f:
     parsed = dockerparse.parse_dockerfile(f.read())
 
