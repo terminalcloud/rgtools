@@ -55,24 +55,24 @@ def mount_volumes(parsed, volumesdir, rootdir):
 #################################### MAIN ######################################
 
 if __name__ == '__main__':
-    rootdir = sys.argv[1]
+    chrootdir = sys.argv[1]
+    dockerfile = sys.argv[2]
 
 
 # Remove additional slashes from the argv
-while (rootdir[0] == '/'): rootdir = rootdir[1:(len(rootdir)+1)]
-while (rootdir[len(rootdir)-1] == '/') : rootdir = rootdir[0:(len(rootdir)-1)]
+while (chrootdir[0] == '/'): chrootdir = chrootdir[1:(len(chrootdir)+1)]
+while (chrootdir[len(chrootdir)-1] == '/') : chrootdir = chrootdir[0:(len(chrootdir)-1)]
 
 # Initialize
-url = full_docker_url(rootdir)
-parsed = parse_dockerfile(get_dockerfile(url))
-user, dock = os.path.split(rootdir)
+parsed = parse_dockerfile(open(dockerfile, 'r').read())
+user, dock = os.path.split(chrootdir)
 
 # mount the volumes if needed
 volumesdir = os.path.join(user, 'volumes')
-mount_volumes(parsed, volumesdir, rootdir)
+mount_volumes(parsed, volumesdir, chrootdir)
 
 # Chroot
-os.chroot(rootdir)
+os.chroot(chrootdir)
 
 # Commands execution
 cmdchain = 'su -l ' + parsed['USER'] + " -c '" +  str(get_envs(parsed)) + str(get_wdir(parsed)) + str(get_entrypoints(parsed)) + "'"
