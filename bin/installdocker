@@ -25,7 +25,7 @@ env = {} # os.environ.copy()
 
 def call(cmd):
     envs = ' '.join('%s=%s' % (e,v) for e,v in env.iteritems())
-    truecmd = 'cd %s && env %s %s' % (workdir, envs, cmd)
+    truecmd = 'cd %s && %s %s' % (workdir, '%s &&' % envs if envs else '', cmd)
     subprocess.call(['chroot', chrootdir, '/bin/sh', '-c', truecmd])
 
 for command, value in parsed['lines']:
@@ -40,7 +40,12 @@ for command, value in parsed['lines']:
         subprocess.call('echo \'export %s="%s"\' >> ~/.bashrc;' % (e, val), shell=True)
     elif command.upper() == 'ADD' or command.upper() == 'COPY':
         src, dst = re.split('\s+', value, 1)
-        truedst = os.path.join(chrootdir, dst.lstrip('/'))
-        dockerparse.mkdir_p(truedst)
-        shutil.copytree(os.path.join(repopath, src), truedst)
+        truesrc = os.path.join(repopath, src)
+        if os.path.isdir(truesrc):
+            truedst = os.path.join(chrootdir, dst.lstrip('/'))
+            dockerparse.mkdir_p(truedst)
+            shutil.copytree(os.path.join(repopath, src), truedst)
+        else:
+            truedst = os.path.join(chrootdir, dst)
+            shutil.copy2(truesrc, truedst)
 
