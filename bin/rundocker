@@ -7,7 +7,6 @@ import errno
 import urllib2
 import hashlib
 import subprocess
-import shlex
 from dockerparse import mkdir_p, full_docker_url, parse_dockerfile, get_dockerfile
 from dockerparse import generate_final_command_from_parsed_dockerfile as get_entrypoints
 
@@ -24,7 +23,7 @@ def get_envs(parsed):
 def get_wdir(parsed):
     if len(parsed['WDIR']) > 0:
       wdir = parsed['WDIR'][0]
-      return 'cd "%s";\n' % wdir
+      return 'cd "%s"; ' % wdir
     else:
       return ''
 
@@ -43,10 +42,11 @@ def make_startup_script(rootdir, runscript, parsed):
        f.close()
 
 def mount_volumes(parsed, volumesdir, rootdir):
-    if len(parsed['VOL']) > 0 :
+    volumes = re.sub('["\[\]\ ]' , '', parsed['VOL'][0]).split(',')
+    if len(volumes) > 0 :
       print 'Creating volumes'
       mkdir_p(volumesdir)
-      for vol in parsed['VOL']:
+      for vol in volumes:
         mkdir_p(volumesdir + vol)
         subprocess.call(["mount", "-o", "bind", (rootdir + vol), (volumesdir + vol)])
 
@@ -75,7 +75,6 @@ mount_volumes(parsed, volumesdir, chrootdir)
 os.chroot(chrootdir)
 
 # Commands execution
-cmdchain = 'su -l ' + parsed['USER'] + " -c '" +  str(get_envs(parsed)) + str(get_wdir(parsed)) + str(get_entrypoints(parsed)) + "'"
-popen_arguments = shlex.split(str(cmdchain))
-print popen_arguments
-subprocess.Popen(popen_arguments)
+cmdchain = ['su'] + ['-l'] + [parsed['USER']] + ['-c'] + [str(get_envs(parsed)) + str(get_wdir(parsed)) + str(get_entrypoints(parsed))]
+print cmdchain
+subprocess.call(cmdchain)
