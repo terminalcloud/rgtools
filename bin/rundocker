@@ -60,8 +60,7 @@ if __name__ == '__main__':
 
 
 # Remove additional slashes from the argv
-while (chrootdir[0] == '/'): chrootdir = chrootdir[1:(len(chrootdir)+1)]
-while (chrootdir[len(chrootdir)-1] == '/') : chrootdir = chrootdir[0:(len(chrootdir)-1)]
+chrootdir = chrootdir.rstrip('/').lstrip('/')
 
 # Initialize
 parsed = parse_dockerfile(open(dockerfile, 'r').read())
