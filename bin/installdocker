@@ -43,11 +43,10 @@ for command, value in parsed['lines']:
     elif command.upper() == 'ADD' or command.upper() == 'COPY':
         src, dst = re.split('\s+', value, 1)
         truesrc = os.path.join(repopath, src)
+        truedst = os.path.join(chrootdir, dst.lstrip('/'))
         if os.path.isdir(truesrc):
-            truedst = os.path.join(chrootdir, dst.lstrip('/'))
             dockerparse.mkdir_p(truedst)
             shutil.copytree(os.path.join(repopath, src), truedst)
         else:
-            truedst = os.path.join(chrootdir, dst)
             shutil.copy2(truesrc, truedst)
 
