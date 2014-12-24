@@ -76,5 +76,5 @@ os.chroot(chrootdir)
 # Commands execution
 cmdchain = ['su'] + ['-l'] + [parsed['USER']] + ['-c'] + [str(get_envs(parsed)) + str(get_wdir(parsed)) + str(get_entrypoints(parsed))]
 print cmdchain
-print 'Your application is running in ports: "%s" ' % parsed['WDIR']
+print 'Your application is running in ports: "%s" ' % parsed['PORTS']
 subprocess.call(cmdchain)
