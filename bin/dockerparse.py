@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+  #!/usr/bin/env python
 import re
 import os
 import sys
@@ -51,6 +51,7 @@ def parse_dockerfile(dockerfile):
     envs = [a[1] for a in re.findall(r'\n(ENV|env)\s+(.*)', dockerfile)]
     volumes = [a[1] for a in re.findall(r'\n(volume|VOLUME)\s+(.*)', dockerfile)]
     wdir = [a[1] for a in re.findall(r'\n(workdir|WORKDIR)\s+(.*)', dockerfile)]
+    ports = [a[1] for a in re.findall(r'\n(expose|EXPOSE)\s+(.*)', dockerfile)]
     duser = [a[1] for a in re.findall(r'\n(user|USER)\s+(.*)', dockerfile)]
     entrypoint = [a[1] for a in re.findall(r'\n(ENTRYPOINT|entrypoint)\s+(.*)', dockerfile)]
     d = {'FROM': f,
@@ -59,6 +60,7 @@ def parse_dockerfile(dockerfile):
         'ENV': envs,
         'VOL': volumes,
         'WDIR': wdir,
+        'PORTS': ports,
         'ENTRYPOINT': entrypoint,
     }
 
