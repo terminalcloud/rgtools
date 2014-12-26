@@ -48,6 +48,7 @@ def mount_volumes(parsed, volumesdir, rootdir):
       mkdir_p(volumesdir)
       for vol in volumes:
         mkdir_p(volumesdir + vol)
+        mkdir_p(rootdir + vol)
         subprocess.call(["mount", "-o", "bind", (rootdir + vol), (volumesdir + vol)])
 
 
