@@ -5,7 +5,7 @@ import re
 import sys
 import shutil
 import subprocess
-
+import pexpect
 import dockerparse
 
 if len(sys.argv) < 2:
@@ -25,6 +25,16 @@ repopath = os.path.normpath(os.path.join(os.environ['HOME'], '.repository'))
 workdir = '/'
 env = {} # os.environ.copy()
 
+
+NO_SUCH_FILE_ERROR = re.compile('No such file')
+
+def pexp_call(cmd):
+    envs = ' '.join('%s=%s' % (e,v) for e,v in env.iteritems())
+    truecmd = 'cd %s && %s %s' % (workdir, '%s &&' % envs if envs else '', cmd)
+    son = pexpect.spawn('chroot %s /bin/sh -c %s' % (chrootdir, truecmd))
+    son.expect('replace')
+    son.sendline('A')
+
 def call(cmd):
     envs = ' '.join('%s=%s' % (e,v) for e,v in env.iteritems())
     truecmd = 'cd %s && %s %s' % (workdir, '%s &&' % envs if envs else '', cmd)
@@ -33,7 +43,7 @@ def call(cmd):
 for command, value in parsed['lines']:
     if command.upper() == 'RUN':
         value = value.replace('&amp;', '&')
-        call(value)
+        pexp_call(value)
     elif command.upper() == 'WORKDIR':
         workdir = value
     elif command.upper() == 'ENV':
