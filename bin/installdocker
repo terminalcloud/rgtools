@@ -29,7 +29,7 @@ env = {} # os.environ.copy()
 def pexp_call(cmd):
     envs = ' '.join('%s=%s' % (e,v) for e,v in env.iteritems())
     truecmd = 'cd %s && %s %s' % (workdir, '%s &&' % envs if envs else '', cmd)
-    son = pexpect.spawn('chroot %s /bin/sh -c %s' % (chrootdir, truecmd))
+    son = pexpect.spawn('chroot', [chrootdir, '/bin/sh', '-c', truecmd])
     son.expect('replace')
     son.sendline('A')
 
