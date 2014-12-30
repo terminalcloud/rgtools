@@ -26,8 +26,6 @@ workdir = '/'
 env = {} # os.environ.copy()
 
 
-NO_SUCH_FILE_ERROR = re.compile('No such file')
-
 def pexp_call(cmd):
     envs = ' '.join('%s=%s' % (e,v) for e,v in env.iteritems())
     truecmd = 'cd %s && %s %s' % (workdir, '%s &&' % envs if envs else '', cmd)
