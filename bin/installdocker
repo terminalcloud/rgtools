@@ -25,15 +25,16 @@ workdir = '/'
 env = {} # os.environ.copy()
 
 
-def call(cmd):
+def call(cmd,chrootdir):
+    os.chroot(chrootdir)
     envs = ' '.join('%s=%s' % (e,v) for e,v in env.iteritems())
     truecmd = 'cd %s && %s %s' % (workdir, '%s &&' % envs if envs else '', cmd)
-    subprocess.call(['chroot', chrootdir, '/bin/sh', '-c', truecmd], shell=True)
+    subprocess.call([truecmd], shell=True)
 
 for command, value in parsed['lines']:
     if command.upper() == 'RUN':
         value = value.replace('&amp;', '&')
-        call(value)
+        call(value, chrootdir)
     elif command.upper() == 'WORKDIR':
         workdir = value
     elif command.upper() == 'ENV':
