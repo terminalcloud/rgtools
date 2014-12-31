@@ -4,9 +4,85 @@ import os
 import re
 import sys
 import shutil
+import urllib2
 import subprocess
 import dockerparse
 
+
+def call(cmd, chrootdir, workdir):
+    envs = ' '.join('%s=%s' % (e,v) for e,v in env.iteritems())
+    truecmd = 'cd %s && %s %s' % (workdir, '%s &&' % envs if envs else '', cmd)
+    subprocess.call(['chroot', chrootdir, '/bin/sh', '-c', truecmd])
+
+def docker_install(parsed, chrootdir, repopath):
+    for command, value in parsed['lines']:
+        if command.upper() == 'RUN':
+            value = value.replace('&amp;', '&')
+            call(value, chrootdir, '/')
+        elif command.upper() == 'WORKDIR':
+            workdir = value
+        elif command.upper() == 'ENV':
+            e, val = re.split('\s+', value, 1)
+            env[e] = val
+            subprocess.call('echo \'export %s="%s"\' >> ~/.bashrc;' % (e, val), shell=True)
+        elif command.upper() == 'ADD' or command.upper() == 'COPY':
+            src, dst = re.split('\s+', value, 1)
+            truesrc = os.path.join(repopath, src)
+            truedst = os.path.join(chrootdir, dst.lstrip('/'))
+            if os.path.isdir(truesrc):
+                dockerparse.mkdir_p(truedst)
+                shutil.copytree(os.path.join(repopath, src), truedst)
+            else:
+                shutil.copy2(truesrc, truedst)
+
+def md2html(file):
+    p = subprocess.Popen(['markdown', file], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, err = p.communicate(b"input' stdin")
+    rc = p.returncode
+    return output
+
+def doc_install(repopath):
+    subprocess.call(['/usr/bin/apt-get', '-y', 'install', 'markdown'])
+    rgtoolspath = os.path.realpath('/root/.rgtools')
+    readme_md = os.path.join(repopath, 'README.md')
+    terminal_md = os.path.join(rgtoolspath, 'md', 'terminal.md')
+    css = os.path.join(rgtoolspath, 'css', 'help.css')
+    dockerparse.mkdir_p('/CL/hooks/')
+    startup_sh='/CL/hooks/startup.sh'
+
+    htmlfile = '/root/readme.html'
+
+    terminal_html = md2html(terminal_md)
+
+    header = '<!DOCTYPE html> \n <html> \n <head> \n <link rel="stylesheet" type="text/css" href="%s" />\n </head> \n <body> \n' % css
+    gh_header = '<style> .markdown-body {min-width: 200px; max-width: 790px; margin: 0 auto; padding: 30px;} </style> \n <article class="markdown-body">'
+    gh_footer = '\n </article>'
+    footer = '</body> \n </html> \n'
+
+    caller = '/srv/cloudlabs/scripts/display.sh %s' % htmlfile
+
+    if os.path.isfile(readme_md) and os.access(readme_md, os.R_OK):
+        readme_html = md2html(readme_md)
+    else:
+        readme_html = '<body>See <a>https://github.com/%s/%s</a></body>' % (user, repo)
+
+    with open(htmlfile, 'w') as f:
+            f.write(header)
+            f.write(terminal_html)
+            f.write(gh_header)
+            f.write(readme_html)
+            f.write(gh_footer)
+            f.write(footer)
+            f.close()
+
+    with open(startup_sh, 'w') as f:
+            f.write('\n%s \n' % caller)
+            f.close()
+
+    os.chmod(startup_sh, 0744)
+
+
+# Main #
 if len(sys.argv) < 2:
     print "Usage: installdocker <chroot_dir> <Dockerfile>"
     sys.exit(1)
@@ -24,30 +100,5 @@ repopath = os.path.normpath(os.path.join(os.environ['HOME'], '.repository'))
 workdir = '/'
 env = {} # os.environ.copy()
 
-
-def call(cmd,chrootdir):
-    os.chroot(chrootdir)
-    envs = ' '.join('%s=%s' % (e,v) for e,v in env.iteritems())
-    truecmd = 'cd %s && %s %s' % (workdir, '%s &&' % envs if envs else '', cmd)
-    subprocess.call([truecmd], shell=True)
-
-for command, value in parsed['lines']:
-    if command.upper() == 'RUN':
-        value = value.replace('&amp;', '&')
-        call(value, chrootdir)
-    elif command.upper() == 'WORKDIR':
-        workdir = value
-    elif command.upper() == 'ENV':
-        e, val = re.split('\s+', value, 1)
-        env[e] = val
-        subprocess.call('echo \'export %s="%s"\' >> ~/.bashrc;' % (e, val), shell=True)
-    elif command.upper() == 'ADD' or command.upper() == 'COPY':
-        src, dst = re.split('\s+', value, 1)
-        truesrc = os.path.join(repopath, src)
-        truedst = os.path.join(chrootdir, dst.lstrip('/'))
-        if os.path.isdir(truesrc):
-            dockerparse.mkdir_p(truedst)
-            shutil.copytree(os.path.join(repopath, src), truedst)
-        else:
-            shutil.copy2(truesrc, truedst)
-
+docker_install(parsed, chrootdir, repopath)
+doc_install(repopath)
