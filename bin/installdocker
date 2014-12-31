@@ -43,10 +43,9 @@ def md2html(file):
 
 def doc_install(repopath):
     subprocess.call(['/usr/bin/apt-get', '-y', 'install', 'markdown'])
-    rgtoolspath = os.path.realpath('/root/.rgtools')
     readme_md = os.path.join(repopath, 'README.md')
     terminal_md = os.path.join(rgtoolspath, 'md', 'terminal.md')
-    css = os.path.join(rgtoolspath, 'css', 'help.css')
+    css = './.rgtools/css/help.css'
     dockerparse.mkdir_p('/CL/hooks/')
     startup_sh='/CL/hooks/startup.sh'
 
