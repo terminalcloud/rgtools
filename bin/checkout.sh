@@ -1,7 +1,7 @@
 #!/bin/bash
-cd ~/.rgtools
+cd /root/.rgtools
 git fetch
 git checkout origin/master
-cd ~/.repository
+cd /root/.repository
 git fetch
 git checkout "$1"
