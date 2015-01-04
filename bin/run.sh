@@ -1,7 +1,7 @@
 #!/bin/bash
 cd ~/
-if [ -a .rgrepo/Snapfile ]; then
+if [ -a .repository/Snapfile ]; then
     runsnap .repository/Snapfile
-elif [ -a .rgrepo/Dockerfile ]; then
+elif [ -a .repository/Dockerfile ]; then
     rundocker snap .repository/Dockerfile
 fi
