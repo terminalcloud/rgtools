@@ -54,9 +54,14 @@ def doc_install(repopath):
 
     terminal_html = md2html(terminal_md)
 
-    header = '<!DOCTYPE html> \n <html> \n <head> \n <link rel="stylesheet" type="text/css" href="%s" />\n </head> \n <body> \n' % css
-    gh_header = '<style> .markdown-body {min-width: 200px; max-width: 790px; margin: 0 auto; padding: 30px;} </style> \n <article class="markdown-body">'
-    gh_footer = '\n </article>'
+
+    jquery_include = '<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>'
+    slide_script = '<script type="text/javascript"> $(document).ready(function(){ $(".buton").click(function(){ $("#slider").slideToggle("slow");}); $("#slider").css({ display: "none" });});</script>'
+    css_include =  '<link rel="stylesheet" type="text/css" href="%s" />' % css
+
+    header = '<!DOCTYPE html> \n <html> \n <head> %s \n %s \n %s \n </head> \n <body> \n ' % (css_include, jquery_include, slide_script)
+    gh_header = '<a href="#" class="buton">See Github repo readme</a> \n <div id="slider" \n <style> .markdown-body {min-width: 200px; max-width: 790px; margin: 0 auto; padding: 30px;} </style> \n <article class="markdown-body"> \n>'
+    gh_footer = '\n </article> \n </div>'
     footer = '</body> \n </html> \n'
 
     caller = '/srv/cloudlabs/scripts/display.sh %s' % htmlfile
