@@ -43,9 +43,10 @@ def md2html(file):
 
 def doc_install(repopath):
     subprocess.call(['/usr/bin/apt-get', '-y', 'install', 'markdown'])
+
     readme_md = os.path.join(repopath, 'README.md')
     rgtoolspath = '/root/.rgtools'
-    terminal_md = os.path.join(rgtoolspath, 'md', 'terminal.md')
+    terminal_md = os.path.join(rgtoolspath, 'md', 'helpbase.md')
     css = './.rgtools/css/help.css'
     dockerparse.mkdir_p('/CL/hooks/')
     startup_sh='/CL/hooks/startup.sh'
@@ -53,30 +54,31 @@ def doc_install(repopath):
     htmlfile = '/root/readme.html'
 
     terminal_html = md2html(terminal_md)
-
-
-    jquery_include = '<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>'
-    slide_script = '<script type="text/javascript"> $(document).ready(function(){ $(".buton").click(function(){ $("#slider").slideToggle("slow");}); $("#slider").css({ display: "none" });});</script>'
     css_include =  '<link rel="stylesheet" type="text/css" href="%s" />' % css
 
-    header = '<!DOCTYPE html> \n <html> \n <head> %s \n %s \n %s \n </head> \n <body> \n ' % (css_include, jquery_include, slide_script)
-    gh_header = '<a href="#" class="buton">See Github repo readme</a> \n <div id="slider" \n <style> .markdown-body {min-width: 200px; max-width: 790px; margin: 0 auto; padding: 30px;} </style> \n <article class="markdown-body"> \n>'
-    gh_footer = '\n </article> \n </div>'
+    # HTML
+    header = '<!DOCTYPE html> \n <html> \n <head>%s</head>\n\n<body>\n' % css_include
+    help_header = '<article class="markdown-body>"\n'
+    help_footer = '</article>\n'
+    docker_header = '<article class="docker-markdown-body>"\n'
+    docker_footer = help_footer
     footer = '</body> \n </html> \n'
 
     caller = '/srv/cloudlabs/scripts/display.sh %s' % htmlfile
 
     if os.path.isfile(readme_md) and os.access(readme_md, os.R_OK):
-        readme_html = md2html(readme_md)
+        docker_html = md2html(readme_md)
     else:
-        readme_html = '<body>See <a>https://github.com/%s/%s</a></body>' % (user, repo)
+        docker_html = '<body>See <a>https://github.com/%s/%s</a></body>' % (user, repo)
 
     with open(htmlfile, 'w') as f:
             f.write(header)
+            f.write(help_header)
             f.write(terminal_html)
-            f.write(gh_header)
-            f.write(readme_html)
-            f.write(gh_footer)
+            f.write(help_footer)
+            f.write(docker_header)
+            f.write(docker_html)
+            f.write(docker_footer)
             f.write(footer)
             f.close()
 
@@ -85,6 +87,9 @@ def doc_install(repopath):
             f.close()
 
     os.chmod(startup_sh, 0744)
+
+    # This is a small hack to open links in external tabs
+    subprocess.call('sed -i \'s/a\ href/a\ target\=\"\_blank\"\ href/g\' %s' % htmlfile  , shell=True)
 
 
 # Main #

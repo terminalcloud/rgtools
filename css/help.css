@@ -14,6 +14,16 @@
   word-wrap: break-word;
 }
 
+.docker-markdown-body {
+  -ms-text-size-adjust: 90%;
+  -webkit-text-size-adjust: 90%;
+  overflow: hidden;
+  background: #F0FFFF;
+  border-color: #DBDBDB;
+  border-style: solid;
+  padding: 10;
+}
+
 .markdown-body a {
   background: transparent;
 }
