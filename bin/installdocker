@@ -58,9 +58,9 @@ def doc_install(repopath):
 
     # HTML
     header = '<!DOCTYPE html> \n <html> \n <head>%s</head>\n\n<body>\n' % css_include
-    help_header = '<article class="markdown-body>"\n'
+    help_header = '<style>.markdown-body {min-width: 200px; max-width: 790px; margin: 0 auto; padding: 30px;}</style> \n <article class="markdown-body">\n'
     help_footer = '</article>\n'
-    docker_header = '<article class="docker-markdown-body>"\n'
+    docker_header = '<article class="docker-markdown-body">\n'
     docker_footer = help_footer
     footer = '</body> \n </html> \n'
 
@@ -75,10 +75,10 @@ def doc_install(repopath):
             f.write(header)
             f.write(help_header)
             f.write(terminal_html)
-            f.write(help_footer)
             f.write(docker_header)
             f.write(docker_html)
             f.write(docker_footer)
+            f.write(help_footer)
             f.write(footer)
             f.close()
 
