@@ -52,6 +52,7 @@ def doc_install(repopath):
     startup_sh='/CL/hooks/startup.sh'
 
     htmlfile = '/root/readme.html'
+    subprocess.call('sed -i \'s/R_E_P_O/%s/g\' %s' % (repopath, terminal_md), shell=True)
 
     terminal_html = md2html(terminal_md)
     css_include =  '<link rel="stylesheet" type="text/css" href="%s" />' % css
