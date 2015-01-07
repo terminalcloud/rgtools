@@ -1,9 +1,7 @@
-#Terminal.com automatic image creation
+#Terminal.com automatic snapshot creation
 
 ##Description:
-This image has been created by [rungithub.com](http://rungithub.com)
-
--
+This snapshot has been created by [rungithub.com](http://rungithub.com)
 
 ##Usage:
 To start the application just open a new Terminal command line tab and run:
@@ -16,8 +14,9 @@ run.sh
 
 - Snapshot path: `/root/snap`
 - Mounted volumes path: `/root/volumes`
-- Repository clone path: `/root/R_E_P_O`
+- Repository clone path: `/root/REPO`
 
 
 ##GitHub project readme file:
-----
+
+---
