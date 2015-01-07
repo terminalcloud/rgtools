@@ -69,7 +69,7 @@ def doc_install(repopath):
     if os.path.isfile(readme_md) and os.access(readme_md, os.R_OK):
         docker_html = md2html(readme_md)
     else:
-        docker_html = '<body>See <a>https://github.com/%s/%s</a></body>' % (user, repo)
+        docker_html = '<body><b>Cannot get readme file from Repo</b></body>' % (user, repo)
 
     with open(htmlfile, 'w') as f:
             f.write(header)

@@ -1,4 +1,4 @@
-#Terminal.com automated image creation
+#Terminal.com automatic image creation
 
 ##Description:
 This image has been created by [rungithub.com](http://rungithub.com)
@@ -7,9 +7,8 @@ This image has been created by [rungithub.com](http://rungithub.com)
 To start the application just run:
 
 ```
-# run.sh
-
-``
+run.sh
+```
 
 Dockerfile from GitHub Repository:
 ----
