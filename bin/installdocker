@@ -4,8 +4,8 @@ import os
 import re
 import sys
 import shutil
-import urllib2
 import subprocess
+
 import dockerparse
 
 
