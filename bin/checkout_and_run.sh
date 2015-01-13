@@ -1,3 +1,3 @@
 #!/bin/bash
-checkout.sh "$1"
-run.sh
+/root/.rgtools/bin/checkout.sh "$1"
+/root/.rgtools/bin/run.sh

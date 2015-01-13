@@ -1,8 +1,8 @@
 #!/bin/bash
 cd /root
 if [ -a .repository/Snapfile ]; then
-    installsnap snap .repository/Snapfile
+    /root/.rgtools/bin/installsnap snap .repository/Snapfile
 elif [ -a .repository/Dockerfile ]; then
-    installdocker snap .repository/Dockerfile
+    /root/.rgtools/bin/installdocker snap .repository/Dockerfile
 fi
 . /root/.bashrc

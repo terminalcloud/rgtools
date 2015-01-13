@@ -1,7 +1,7 @@
 #!/bin/bash
 cd ~/
 if [ -a .repository/Snapfile ]; then
-    runsnap .repository/Snapfile
+    /root/.rgtools/bin/runsnap .repository/Snapfile
 elif [ -a .repository/Dockerfile ]; then
-    rundocker snap .repository/Dockerfile
+    /root/.rgtools/bin/rundocker snap .repository/Dockerfile
 fi
