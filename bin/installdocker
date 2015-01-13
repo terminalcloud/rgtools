@@ -65,7 +65,7 @@ def doc_install(repopath):
     docker_footer = help_footer
     footer = '</body> \n </html> \n'
 
-    caller = '/srv/cloudlabs/scripts/display.sh %s' % htmlfile
+    caller = '/srv/cloudlabs/scripts/display.sh %s;' % htmlfile
 
     if os.path.isfile(readme_md) and os.access(readme_md, os.R_OK):
         docker_html = md2html(readme_md)
