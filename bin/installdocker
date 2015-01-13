@@ -113,3 +113,6 @@ env = {} # os.environ.copy()
 
 docker_install(parsed, chrootdir, repopath)
 doc_install(repopath)
+
+print "\n" * 100
+subprocess.call('clear')
