@@ -1,4 +1,2 @@
 #!/bin/bash
-source /root/.bashrc
-checkout.sh "$1"
-setup.sh
+echo "source /root/.bashrc; checkout.sh $1; setup.sh" | /srv/cloudlabs/scripts/run_in_term.js
