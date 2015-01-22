@@ -1,2 +1,2 @@
-#!/bin/sh
-sh "$1"
+#!/bin/bash
+bash "$1"

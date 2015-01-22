@@ -1,9 +1,13 @@
 #!/bin/bash
 cd /root
-if [ -a .repository/Snapfile ]; then
+if [ -a .repository/snapfile ]; then
+    /root/.rgtools/bin/installsnap snap .repository/snapfile
+elif [ -a .repository/Snapfile ]; then
     /root/.rgtools/bin/installsnap snap .repository/Snapfile
 elif [ -a .repository/Dockerfile ]; then
     /root/.rgtools/bin/installdocker snap .repository/Dockerfile
+elif [ -a .repository/DOCKERFILE ]; then
+    /root/.rgtools/bin/installdocker snap .repository/DOCKERFILE
 fi
 . /root/.bashrc
 cat >> /CL/hooks/startup.sh << EOF
