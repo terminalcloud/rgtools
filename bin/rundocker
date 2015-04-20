@@ -2,10 +2,6 @@
 import re
 import os
 import sys
-import json
-import errno
-import urllib2
-import hashlib
 import subprocess
 from dockerparse import mkdir_p, full_docker_url, parse_dockerfile, get_dockerfile
 from dockerparse import generate_final_command_from_parsed_dockerfile as get_entrypoints
