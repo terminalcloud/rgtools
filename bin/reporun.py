@@ -140,7 +140,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('repo', type=str)
     parser.add_argument('branch', type=str)
-    parser.add_argument('commit', type=str)
+    parser.add_argument('commit', type=str) # By now, the commit is only used for logging.
     parser.add_argument('-d', '--basedir', type=str, default='./repo', help='base repo dir')
     parser.add_argument('-g', '--conf', type=str, default='appspec.yml', help='Json config file')
     parser.description = "Code Deploy configuration execution, by Terminal.com"
